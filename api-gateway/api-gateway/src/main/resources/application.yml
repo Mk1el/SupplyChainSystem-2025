@@ -1,0 +1,51 @@
+server:
+  port: 8900
+
+spring:
+  application:
+    name: api-gateway
+
+  # Use the new, corrected structure for all gateway properties
+  cloud:
+    gateway:
+      server:
+        webflux: # This is the new parent key
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: security-service
+              uri: lb://SECURITY-SERVICE
+              predicates:
+                - Path=/api/auth/**
+
+            - id: inventory-service
+              uri: lb://INVENTORY-SERVICE
+              predicates:
+                - Path=/api/inventory/**
+
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/api/orders/**
+
+# The springdoc configuration remains the same
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    urls:
+      - name: Security Service
+        url: /security-service/v3/api-docs
+      - name: Inventory Service
+        url: /inventory-service/v3/api-docs
+      - name: Order Service
+        url: /order-service/v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
